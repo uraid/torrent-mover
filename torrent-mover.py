@@ -56,22 +56,36 @@ def main():
     parser.add_argument('sessions_folder', type=str)
     parser.add_argument('--src', type=str, required=True)
     parser.add_argument('--dst', type=str, required=True)
+    parser.add_argument('--no-backup', default=False, action='store_true')
     args = parser.parse_args()
 
     if (args.src.endswith('/') and not args.dst.endswith('/')) or \
         (args.dst.endswith('/') and not args.src.endswith('/')):
-        logging.info("[-] Make sure to set both src and dst with matching slashes")
+        logging.error("[-] Make sure to set both src and dst with matching slashes")
         return
 
-    # Backup current directory
-    logging.info(f"[*] Creating a backup for: {args.sessions_folder}")
+    # Check if folder exists
     sessions_path = pathlib.Path(args.sessions_folder)
-    session_dirname = sessions_path.as_posix()
-    create_backup(session_dirname, f'{session_dirname}_backup')
-    logging.info("[*] Backup created succesfully")
+    if not sessions_path.exists():
+        logging.error("[-] Selected sessions folder doesn't exist")
+        return
 
     # Find all .rtorrent files
     files_to_process = list_rtorrent_files(sessions_path)
+
+    # Check if files were found
+    if len(files_to_process) == 0:
+        logging.error("[-] No .rtorrent files found. Are you sure you specified the sessions folder?")
+        return
+
+    if not args.no_backup:
+        # Backup current directory
+        logging.info(f"[*] Creating a backup for: {args.sessions_folder}")
+        session_dirname = sessions_path.as_posix()
+        create_backup(session_dirname, f'{session_dirname}_backup')
+        logging.info("[*] Backup created succesfully")
+    else:
+        logging.info("[*] Skipping backup folder")
 
     # Process files
     logging.info("[*] Processing files..")
