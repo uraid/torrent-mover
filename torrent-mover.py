@@ -7,9 +7,9 @@ import bencodepy
 def create_backup(src_path: str, dst_path: str):
     shutil.copytree(src_path, dst_path, dirs_exist_ok=True)
 
-def list_rtorrent_files(src_path: pathlib.Path) -> list:
+def list_rtorrent_files(sessions_path: pathlib.Path) -> list:
     files_to_process = []
-    for entry in src_path.iterdir():
+    for entry in sessions_path.iterdir():
         if entry.is_file() and entry.suffix == '.rtorrent':
             files_to_process.append(entry)
 
@@ -53,28 +53,38 @@ def main():
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, required=True)
+    parser.add_argument('sessions_folder', type=str)
+    parser.add_argument('--src', type=str, required=True)
+    parser.add_argument('--dst', type=str, required=True)
     args = parser.parse_args()
 
+    if (args.src.endswith('/') and not args.dst.endswith('/')) or \
+        (args.dst.endswith('/') and not args.src.endswith('/')):
+        logging.info("[-] Make sure to set both src and dst with matching slashes")
+        return
+
     # Backup current directory
-    logging.info(f"[*] Creating a backup for: {args.folder}")
-    src_path = pathlib.Path(args.folder)
-    src_dir = src_path.as_posix()
-    create_backup(src_dir, f'{src_dir}_backup')
+    logging.info(f"[*] Creating a backup for: {args.sessions_folder}")
+    sessions_path = pathlib.Path(args.sessions_folder)
+    session_dirname = sessions_path.as_posix()
+    create_backup(session_dirname, f'{session_dirname}_backup')
     logging.info("[*] Backup created succesfully")
 
     # Find all .rtorrent files
-    files_to_process = list_rtorrent_files(src_path)
+    files_to_process = list_rtorrent_files(sessions_path)
 
     # Process files
+    logging.info("[*] Processing files..")
     for fn in files_to_process:
         logging.debug(f"[*] Processing file: {fn}")
-        result = process_file(fn, '/downloads/rTorrent')
+        result = process_file(fn, args.src, args.dst)
 
         if result:
             logging.debug(f"[+] Processed succesfully: {fn}")
         else:
             logging.debug(f"[-] Problem processing: {fn}")
+
+    logging.info("[*] Finished processing files")
 
 if __name__ == "__main__":
     main()
