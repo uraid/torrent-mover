@@ -52,11 +52,12 @@ def process_file(file_path: pathlib.Path, src_path: str, dst_path: str = "/test"
 def main():
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('sessions_folder', type=str)
-    parser.add_argument('--src', type=str, required=True)
-    parser.add_argument('--dst', type=str, required=True)
-    parser.add_argument('--no-backup', default=False, action='store_true')
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS, help='')
+    parser.add_argument('sessions_folder', type=str, help="This is the rTorrent sessions folder")
+    parser.add_argument('--src', type=str, required=True, help="Set source path to change from")
+    parser.add_argument('--dst', type=str, required=True, help="Set destination path to change to")
+    parser.add_argument('--no-backup', default=False, action='store_true', help="Don't create a backup folder for sessions data")
     args = parser.parse_args()
 
     if (args.src.endswith('/') and not args.dst.endswith('/')) or \
