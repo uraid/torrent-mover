@@ -7,6 +7,16 @@
 
 
 # Usage
-    -U		- Set max upload speed [KBs], use "-1" to set unlimited
-    -D		- Set max download speed [KBs], use "-1" to set unlimited
-    -h | --help	- Help
+    torrent-mover.py [-h] --src SRC --dst DST [--no-backup] sessions_folder
+
+    positional arguments:
+    sessions_folder  This is the rTorrent sessions folder
+
+    options:
+    -h, --help
+    --src SRC        Set source path to change from
+    --dst DST        Set destination path to change to
+    --no-backup      Don't create a backup folder for sessions data
+
+    Example: python torrent-mover.py --src /downloads/rTorrent/Temp/ --dst /downloads/rTorrent/Movies/
+    /config/rTorrent/session
