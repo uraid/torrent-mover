@@ -82,6 +82,8 @@ python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /down
         logging.error("[-] No .rtorrent files found. Are you sure you specified the sessions folder?")
         return
 
+    input("[*] Please stop your rTorrent instance before continuing! (Press any key)")
+
     if not args.no_backup:
         # Backup current directory
         logging.info(f"[*] Creating a backup for: {args.sessions_folder}")
