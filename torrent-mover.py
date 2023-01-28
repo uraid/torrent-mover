@@ -88,8 +88,18 @@ python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /down
         # Backup current directory
         logging.info(f"[*] Creating a backup for: {args.sessions_folder}")
         session_dirname = sessions_path.as_posix()
-        create_backup(session_dirname, f'{session_dirname}_backup')
-        logging.info("[*] Backup created succesfully")
+
+        # Let user decide if to overwrite an old backup
+        if pathlib.Path(f'{session_dirname}_backup').exists():
+            user_choice = input("[-] Backup folder already exists. Do you want to overwrite? [y/N] ")
+            if user_choice.lower() == 'y':
+                create_backup(session_dirname, f'{session_dirname}_backup')
+                logging.info("[*] Backup created succesfully")
+            else:
+                logging.info("[*] Chose not to overwrite backup")
+        else:
+            create_backup(session_dirname, f'{session_dirname}_backup')
+            logging.info("[*] Backup created succesfully")
     else:
         logging.info("[*] Skipping backup folder")
 

@@ -18,5 +18,5 @@
     --dst DST        Set destination path to change to
     --no-backup      Don't create a backup folder for sessions data
 
-    Example: python torrent-mover.py --src /downloads/rTorrent/Temp/ --dst /downloads/rTorrent/Movies/
+    Example: python torrent-mover.py --src /downloads/Temp/ --dst /downloads/Movies/
     /config/rTorrent/session
