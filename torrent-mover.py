@@ -50,7 +50,7 @@ def process_file(file_path: pathlib.Path, src_path: str, dst_path: str = "/test"
     return True
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
 
     example_text = f"""Example:
 python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /downloads/rTorrent/Movies/ /config/rTorrent/session"""
