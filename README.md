@@ -1,3 +1,9 @@
+# Description
+Change path in torrents session data to skip `Force Recheck` and save torrent stats.  
+This script doesn't stop the torrent client automatically - you should do it manually before changing any sessions data.  
+
+Currently supports rTorrent only!  
+
 # Dependencies
 * Python 3.6+
 * bencode.py
