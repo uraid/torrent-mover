@@ -4,6 +4,7 @@ import logging
 import argparse
 import bencodepy
 
+DEBUG = False
 PATH_KEYS = {
     # rTorrent
     '.rtorrent': [b'directory'],
@@ -35,9 +36,15 @@ def process_file(file_path: pathlib.Path, src_path: str, dst_path: str) -> bool:
         logging.debug(f"[-] Bencode.py error: {e}")
         return False
 
-    # if 'directory' not in decoded_data:
-    #     logging.debug("[-] Couldn't find directory in decoded data")
-    #     return False
+    found = False
+    for value in PATH_KEYS.values():
+        for key in value:
+            found = True
+            break
+
+    if not found:
+        logging.debug("[-] Couldn't find any key in decoded data")
+        return False
 
     if file_path.suffix not in PATH_KEYS:
         logging.debug("[-] Couldn't find src directory in decoded data")
@@ -67,7 +74,9 @@ def process_file(file_path: pathlib.Path, src_path: str, dst_path: str) -> bool:
     return True
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    if DEBUG:
+        logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
     example_text = f"""Example:
 python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /downloads/rTorrent/Movies/ /config/rTorrent/session"""
@@ -78,7 +87,7 @@ python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /down
     parser.add_argument('--src', type=str, required=True, help="Set source path to change from")
     parser.add_argument('--dst', type=str, required=True, help="Set destination path to change to")
     parser.add_argument('--no-backup', default=False, action='store_true', help="Don't create a backup folder for sessions data")
-    parser.add_argument('--version', action='version', version='%(prog)s 0.1')
+    parser.add_argument('--version', action='version', version='%(prog)s 0.2')
     args = parser.parse_args()
 
     if (args.src.endswith('/') and not args.dst.endswith('/')) or \
