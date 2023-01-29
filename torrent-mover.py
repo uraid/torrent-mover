@@ -4,42 +4,59 @@ import logging
 import argparse
 import bencodepy
 
+PATH_KEYS = {
+    # rTorrent
+    '.rtorrent': [b'directory'],
+    # qBittorrent
+    '.fastresume': [b'qBt-savePath', b'save_path']
+}
+
 def create_backup(src_path: str, dst_path: str):
     shutil.copytree(src_path, dst_path, dirs_exist_ok=True)
 
-def list_rtorrent_files(sessions_path: pathlib.Path) -> list:
+def list_session_files(sessions_path: pathlib.Path) -> list:
     files_to_process = []
     for entry in sessions_path.iterdir():
-        if entry.is_file() and entry.suffix == '.rtorrent':
+        if entry.is_file() and entry.suffix in PATH_KEYS:
             files_to_process.append(entry)
 
     return files_to_process
 
-def process_file(file_path: pathlib.Path, src_path: str, dst_path: str = "/test") -> bool:
-    bencode_decoder = bencodepy.Bencode(encoding='utf-8')
+def process_file(file_path: pathlib.Path, src_path: str, dst_path: str) -> bool:
+    src_path_encoded = src_path.encode('utf-8')
+    dst_path_encoded = dst_path.encode('utf-8')
+
     with open(file_path, 'rb') as fp:
         data = fp.read()
 
     try:
-        decoded_data = bencode_decoder.decode(data)
+        decoded_data = bencodepy.decode(data)
     except bencodepy.exceptions.BencodeDecodeError as e:
         logging.debug(f"[-] Bencode.py error: {e}")
         return False
-    
-    if 'directory' not in decoded_data:
-        logging.debug("[-] Couldn't find directory in decoded data")
+
+    # if 'directory' not in decoded_data:
+    #     logging.debug("[-] Couldn't find directory in decoded data")
+    #     return False
+
+    if file_path.suffix not in PATH_KEYS:
+        logging.debug("[-] Couldn't find src directory in decoded data")
         return False
 
-    src_folder = decoded_data['directory']
-    if src_path not in src_folder:
-        logging.debug("[-] Couldn't find src directory in decoded data")
-        return True
+    keys_to_change = PATH_KEYS[file_path.suffix]
 
-    decoded_data['directory'] = decoded_data['directory'].replace(src_path, dst_path)
+    for key in keys_to_change:
+        src_folder = decoded_data[key]
+        if src_path_encoded not in src_folder:
+            logging.debug("[-] Couldn't find src directory in decoded data")
+            return True
+
+        decoded_data[key] = decoded_data[key].replace(src_path_encoded, dst_path_encoded)
+
     logging.debug(f"[*] Changing folder from {src_path} to {dst_path}")
 
     try:
-        encoded_data = bencode_decoder.encode(decoded_data)
+        encoded_data = bencodepy.encode(decoded_data)
     except bencodepy.exceptions.BencodeEncodeError as e:
         logging.debug(f"[-] Bencode.py error: {e}")
         return False
@@ -50,7 +67,7 @@ def process_file(file_path: pathlib.Path, src_path: str, dst_path: str = "/test"
     return True
 
 def main():
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
     example_text = f"""Example:
 python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /downloads/rTorrent/Movies/ /config/rTorrent/session"""
@@ -75,15 +92,15 @@ python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /down
         logging.error("[-] Selected sessions folder doesn't exist")
         return
 
-    # Find all .rtorrent files
-    files_to_process = list_rtorrent_files(sessions_path)
+    # Find all session files
+    files_to_process = list_session_files(sessions_path)
 
     # Check if files were found
     if len(files_to_process) == 0:
-        logging.error("[-] No .rtorrent files found. Are you sure you specified the sessions folder?")
+        logging.error("[-] No session files found. Are you sure you specified the sessions folder?")
         return
 
-    input("[*] Please stop your rTorrent instance before continuing! (Press any key)")
+    input("[*] Please stop your torrent client (rTorrent / qBittorrent) instance before continuing! (Press any key)")
 
     if not args.no_backup:
         # Backup current directory
