@@ -61,6 +61,7 @@ python {pathlib.Path(__file__).name} --src /downloads/rTorrent/Temp/ --dst /down
     parser.add_argument('--src', type=str, required=True, help="Set source path to change from")
     parser.add_argument('--dst', type=str, required=True, help="Set destination path to change to")
     parser.add_argument('--no-backup', default=False, action='store_true', help="Don't create a backup folder for sessions data")
+    parser.add_argument('--version', action='version', version='%(prog)s 0.1')
     args = parser.parse_args()
 
     if (args.src.endswith('/') and not args.dst.endswith('/')) or \
