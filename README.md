@@ -8,7 +8,7 @@ Currently supports rTorrent / qBittorrent only!
 * Python 3.6+
 * bencode.py
 
-# Script Setup
+# Requirements
 `pip install bencode.py` 
 
 
